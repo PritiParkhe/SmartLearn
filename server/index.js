@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import connnectDB from "./database/db.js";
 import userRoute from "./routes/user_routes.js";
 
-
 dotenv.config({});
 
 const app = express();
@@ -15,10 +14,12 @@ const PORT = process.env.PORT || 3000;
 // default middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin:"http://localhost:8080",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 
 // api
 app.use("/api/v1/user", userRoute);
