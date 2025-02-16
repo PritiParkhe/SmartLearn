@@ -19,6 +19,7 @@ import {
 } from "@/features/api/authapi";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [signupInput, setSignupInput] = useState({
@@ -46,6 +47,7 @@ const Login = () => {
       isSuccess: loginIsSuccess,
     },
   ] = useLoginUserMutation();
+  const navigate = useNavigate();
 
   const changeInputHandeller = (e, type) => {
     const { name, value } = e.target;
@@ -71,6 +73,7 @@ const Login = () => {
     }
     if (loginIsSuccess && loginData) {
       toast.success(loginData.message || "Login successfull.");
+      navigate("/")
     }
     if (loginError) {
       toast.error(loginData.data.message || "Login failed.");
@@ -84,7 +87,7 @@ const Login = () => {
     loginError,
   ]);
   return (
-    <div className="flex items-center w-full justify-center">
+    <div className="flex items-center w-full justify-center mt-20">
       <Tabs defaultValue="account" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="signup">Signup</TabsTrigger>
