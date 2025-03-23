@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { userLoggedin } from "../authSlice";
+import { userLoggedIn, userLoggedOut } from "../authSlice";
 
 const USER_API = import.meta.env.VITE_BACKEND_URL;
 export const authApi = createApi({
@@ -25,7 +25,7 @@ export const authApi = createApi({
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
-          dispatch(userLoggedin({ user: result.data.user }));
+          dispatch(userLoggedIn({ user: result.data.user }));
         } catch (error) {
           console.log(error);
         }
@@ -36,13 +36,30 @@ export const authApi = createApi({
         url: "logout",
         method: "GET",
       }),
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        try {
+          dispatch(userLoggedOut());
+        } catch (error) {
+          console.log(error);
+        }
+      },
     }),
     loadUser: builder.query({
       query: () => ({
         url: "profile",
         method: "GET",
       }),
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        try {
+          const result = await queryFulfilled;
+          console.log("Loaded user:", result.data);
+          dispatch(userLoggedIn({ user: result.data.user }));
+        } catch (error) {
+          console.log("Error loading user:", error);
+        }
+      },
     }),
+
     updateUser: builder.mutation({
       query: (formData) => ({
         url: "profile/update",
@@ -58,5 +75,5 @@ export const {
   useLoginUserMutation,
   useLoadUserQuery,
   useUpdateUserMutation,
-  useLogoutUserMutation
+  useLogoutUserMutation,
 } = authApi;
