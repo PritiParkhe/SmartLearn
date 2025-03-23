@@ -8,11 +8,11 @@ export const createCourse = async (req, res) => {
         message: "All fields are required",
       });
     }
-
+    
     const course = await Course.create({
       courseTitle,
       category,
-      creator: req.id,
+      creator:req.id,
     });
     return res.status(201).json({
       course,
