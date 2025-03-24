@@ -8,12 +8,13 @@ export const createCourse = async (req, res) => {
         message: "All fields are required",
       });
     }
-    
+
     const course = await Course.create({
       courseTitle,
       category,
-      creator:req.id,
+      creator: req.id,
     });
+
     return res.status(201).json({
       course,
       message: "Course created",
@@ -23,6 +24,27 @@ export const createCourse = async (req, res) => {
 
     return res.status(500).json({
       message: "Failed to create course",
+    });
+  }
+};
+
+export const getCreatorCourses = async (req, res) => {
+  try {
+    const userId = req._id;
+    const courses = await Course.find({ creator: userId });
+    if (!courses) {
+      return res.status(404).json({
+        courses: [],
+        message: "Courses not found",
+      });
+    }
+    return res.status(200).json({
+      courses,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Failed to get course",
     });
   }
 };
