@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -21,10 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEditCourseMutation } from "@/features/api/courseApi";
+import { toast } from "sonner";
 
 const CourseTab = () => {
   const isPublished = true;
+
   const [input, setInput] = useState({
     courseTitle: "",
     subTitle: "",
@@ -35,8 +38,12 @@ const CourseTab = () => {
     courseThumbnail: "",
   });
 
+  const params = useParams();
+  const courseId = params.courseId;
   const [previewThumbnail, setPreviewThumbnail] = useState("");
   const navigate = useNavigate();
+  const [editCourse, { data, isLoading, isSuccess, error }] =
+    useEditCourseMutation();
 
   const changeEventHandeller = (e) => {
     const { name, value } = e.target;
@@ -63,10 +70,25 @@ const CourseTab = () => {
     }
   };
 
-  const updateCourseHandeller = () => {
-    console.log(input);
+  const updateCourseHandeller = async () => {
+    const formData = new FormData();
+    formData.append("courseTitle", input.courseTitle);
+    formData.append("subTitle", input.subTitle);
+    formData.append("description", input.description);
+    formData.append("category", input.category);
+    formData.append("courseLevel", input.courseLevel);
+    formData.append("coursePrice", input.coursePrice);
+    formData.append("courseThumbnail", input.courseThumbnail);
+    await editCourse({ formData, courseId });
   };
-  const isLoading = false;
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(data.message || "Course updated.");
+    }
+    if (error) {
+      toast.error(error.data.message || "Failed to update course");
+    }
+  }, [isSuccess, error]);
   return (
     <Card>
       <CardHeader className="flex flex-row justify-between">
