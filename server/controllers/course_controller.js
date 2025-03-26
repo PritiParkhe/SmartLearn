@@ -2,7 +2,6 @@ import { Course } from "../models/course_model.js";
 import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 import fs from "fs";
 
-
 export const createCourse = async (req, res) => {
   try {
     const { courseTitle, category } = req.body;
@@ -110,6 +109,28 @@ export const editCourse = async (req, res) => {
     console.log(error);
     return res.status(500).json({
       message: "Failed to get course",
+    });
+  }
+};
+
+export const getCourseById = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    let course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({
+        message: "Course not found",
+      });
+    }
+    return res.status(200).json({
+      course,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Failed to get course by id",
     });
   }
 };

@@ -22,7 +22,10 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEditCourseMutation } from "@/features/api/courseApi";
+import {
+  useEditCourseMutation,
+  useGetCourseByIdQuery,
+} from "@/features/api/courseApi";
 import { toast } from "sonner";
 
 const CourseTab = () => {
@@ -38,10 +41,31 @@ const CourseTab = () => {
     courseThumbnail: "",
   });
 
+  //  for get course by id
   const params = useParams();
   const courseId = params.courseId;
+  const { data: courseByIdData, isLoading: courseByIdDataLoading } =
+    useGetCourseByIdQuery(courseId, { refetchOnMountOrArgChange: true });
+
+  useEffect(() => {
+    if (courseByIdData?.course) {
+      const course = courseByIdData?.course;
+      setInput({
+        courseTitle: course.courseTitle,
+        subTitle: course.subTitle,
+        description: course.description,
+        category: course.category,
+        courseLevel: course.courseLevel,
+        coursePrice: course.categoryPrice,
+        courseThumbnail: course.courseThumbnail,
+      });
+    }
+  }, [courseByIdData]);
+
   const [previewThumbnail, setPreviewThumbnail] = useState("");
   const navigate = useNavigate();
+
+  // for edit course
   const [editCourse, { data, isLoading, isSuccess, error }] =
     useEditCourseMutation();
 
@@ -89,6 +113,9 @@ const CourseTab = () => {
       toast.error(error.data.message || "Failed to update course");
     }
   }, [isSuccess, error]);
+  
+  if (courseByIdDataLoading)
+    return <Loader2 className="h-4  w-4 animate-spin"></Loader2>;
   return (
     <Card>
       <CardHeader className="flex flex-row justify-between">
