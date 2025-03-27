@@ -1,4 +1,5 @@
 import { Course } from "../models/course_model.js";
+import { Lecture } from "../models/lecture_model.js";
 import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 import fs from "fs";
 
@@ -132,5 +133,40 @@ export const getCourseById = async (req, res) => {
     return res.status(500).json({
       message: "Failed to get course by id",
     });
+  }
+};
+
+export const createLecture = async (req, res) => {
+  try {
+    const { lectureTitle } = req.body;
+    const { courseId } = req.params; 
+
+    if (!lectureTitle) {
+      return res.status(400).json({ message: "Lecture title is required" });
+    }
+    if (!courseId) {
+      return res.status(400).json({ message: "Course ID is required" });
+    }
+
+    // Find the course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Create lecture
+    const lecture = await Lecture.create({ lectureTitle });
+
+    // Associate lecture with course
+    course.lectures.push(lecture._id);
+    await course.save();
+
+    return res.status(201).json({
+      lecture,
+      message: "Lecture created successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to create lecture" });
   }
 };
