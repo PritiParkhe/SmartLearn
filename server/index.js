@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import connnectDB from "./database/db.js";
 import userRoute from "./routes/user_routes.js";
 import courseRoute from "./routes/course_routes.js";
+import mediaRoute from "./routes/media_routes.js"
 
 dotenv.config({});
 
@@ -25,6 +26,7 @@ app.use(
 // api
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/course", courseRoute);
+app.use("/api/v1/media", mediaRoute);
 
 connnectDB().then(() => {
   app.listen(PORT, () => {

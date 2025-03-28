@@ -5,6 +5,7 @@ import {
   createLecture,
   editCourse,
   getCourseById,
+  getCourseLecture,
   getCreatorCourses,
 } from "../controllers/course_controller.js";
 import upload from "../utils/multer.js";
@@ -18,5 +19,6 @@ router
   .put(isAuthenticated, upload.single("courseThumbnail"), editCourse);
 router.route("/:courseId").get(isAuthenticated, getCourseById);
 router.route("/:courseId/lecture").post(isAuthenticated, createLecture);
+router.route("/:courseId/lecture").get(isAuthenticated, getCourseLecture)
 
 export default router;

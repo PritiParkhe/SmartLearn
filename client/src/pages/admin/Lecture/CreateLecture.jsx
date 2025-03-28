@@ -1,19 +1,33 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCreateLectureMutation } from "@/features/api/courseApi";
+import {
+  useCreateLectureMutation,
+  useGetCourseByIdQuery,
+  useGetCourseLectureQuery,
+} from "@/features/api/courseApi";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import Lecture from "./Lecture";
 
 const CreateLecture = () => {
   const [lectureTitle, setlectureTitle] = useState("");
-  const param = useParams();
-  const courseId = param.courseId;
+  const params = useParams();
+  const courseId = params.courseId;
+
   const navigate = useNavigate();
+
   const [createLecture, { data, isSuccess, isLoading, error }] =
     useCreateLectureMutation();
+
+  const {
+    data: lectureData,
+    isLoading: lectureLoading,
+    isError: lectureError,
+    refetch,
+  } = useGetCourseLectureQuery(courseId);
 
   const createLectureHandeller = async () => {
     if (!lectureTitle.trim()) {
@@ -21,15 +35,19 @@ const CreateLecture = () => {
       return;
     }
     await createLecture({ lectureTitle, courseId });
+    
   };
   useEffect(() => {
     if (isSuccess) {
+      refetch();
       toast.success(data.message || "Lecture created");
     }
     if (error) {
       toast.error(error.data.message || "Something went wrong");
     }
   }, [isSuccess, error]);
+  // console.log(lecturedata);
+
   return (
     <div className=" flex-1 mx-10">
       <div className="mb-4">
@@ -38,9 +56,7 @@ const CreateLecture = () => {
         </h1>
         <p className="text-sm">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque
-          temporibus doloremque enim maiores. Sit cupiditate maiores itaque
-          nulla laboriosam optio? Placeat, officiis numquam? Dolores ad officiis
-          modi facere incidunt similique?
+          temporibus doloremque enim maiores.
         </p>
       </div>
       <div className="space-y-4">
@@ -71,6 +87,24 @@ const CreateLecture = () => {
               "Create lecture"
             )}
           </Button>
+        </div>
+        <div className="mt-10">
+          {lectureLoading ? (
+            <p>Loading lectures...</p>
+          ) : lectureError ? (
+            <p>Failed to load lectures.</p>
+          ) : lectureData.lectures.length === 0 ? (
+            <p>No lectures availabe</p>
+          ) : (
+            lectureData.lectures.map((lecture, index) => (
+              <Lecture
+                key={lecture._id}
+                lecture={lecture}
+                courseId={courseId}
+                index={index}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
