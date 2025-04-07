@@ -14,7 +14,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-const MEDIA_API = `${import.meta.env.VITE_BACKEND_URL}/media`;
+const MEDIA_API = `http://localhost:8080/api/v1/media`;
 
 const LectureTab = () => {
   const [title, setTitle] = useState("");
@@ -34,6 +34,7 @@ const LectureTab = () => {
           onUploadProgress: ({ loaded, total }) => {
             setUploadProgress(Math.round((loaded * 100) / total));
           },
+          
         });
         if (res.data.success) {
           setUploadVideoInfo({
@@ -87,7 +88,10 @@ const LectureTab = () => {
             />
           </div>
           <div className="flex items-center">
-            <Switch checked={isFree} onCheckedChange={(checked) => setIsFree(checked)} />
+            <Switch
+              checked={isFree}
+              onCheckedChange={(checked) => setIsFree(checked)}
+            />
             <Label htmlFor="airplane-mode">Is this video is free</Label>
           </div>
           {mediaProgress && (
