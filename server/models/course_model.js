@@ -38,6 +38,10 @@ const courseSchema = new mongoose.Schema(
         ref: "Lecture",
       },
     ],
+    creator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     isPublished: {
       type: Boolean,
       default: false,

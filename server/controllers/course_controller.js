@@ -32,9 +32,31 @@ export const createCourse = async (req, res) => {
   }
 };
 
+export const getPublishedCourse = async (_, res) => {
+  try {
+    const courses = await Course.find({ isPublished: true }).populate({
+      path: "creator",
+      select: "name photoUrl",
+    });
+
+    if (!courses || courses.length === 0) {
+      return res.status(404).json({
+        message: "No published courses found",
+      });
+    }
+
+    return res.status(200).json({ courses });
+  } catch (error) {
+    console.error("Error fetching published courses:", error.message);
+    return res.status(500).json({
+      message: "Failed to get published courses",
+    });
+  }
+};
+
 export const getCreatorCourses = async (req, res) => {
   try {
-    const userId = req._id;
+    const userId = req.id;
     const courses = await Course.find({ creator: userId });
     if (!courses) {
       return res.status(404).json({
@@ -64,8 +86,10 @@ export const editCourse = async (req, res) => {
       courseLevel,
       coursePrice,
     } = req.body;
-    const thumbnail = req.file;
 
+    const thumbnail = req.file; // this is the uploaded file
+
+    // Find the course
     let course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({
@@ -73,46 +97,53 @@ export const editCourse = async (req, res) => {
       });
     }
 
-    let courseThumbnail;
-    if (!thumbnail) {
-      if (course.courseThumbnail) {
-        const publicId = course.courseThumbnail.split("/").pop().split(".")[0];
-        await deleteMediaFromCloudinary(publicId); // delete old img
+    // Default to existing thumbnail
+    let courseThumbnail = course.courseThumbnail;
+
+    // If a new thumbnail was uploaded
+    if (thumbnail) {
+      // Delete the old thumbnail from Cloudinary
+      if (courseThumbnail) {
+        const publicId = courseThumbnail.split("/").pop().split(".")[0];
+        await deleteMediaFromCloudinary(publicId);
       }
-      // upload thumbnail on cloudinary
-      courseThumbnail = await uploadMedia(thumbnail.path);
+
+      // Upload the new one
+      const uploaded = await uploadMedia(thumbnail.path);
+      courseThumbnail = uploaded?.secure_url;
+
+      // Delete local file
+      fs.unlinkSync(thumbnail.path);
     }
 
+    // Prepare update data, with validation
     const updateData = {
-      courseTitle,
-      subTitle,
-      description,
-      category,
-      courseLevel,
-      coursePrice,
-      courseThumbnail: courseThumbnail?.secure_url,
+      ...(courseTitle && { courseTitle }),
+      ...(subTitle && { subTitle }),
+      ...(description && { description }),
+      ...(category && { category }),
+      ...(courseLevel && { courseLevel }),
+      ...(coursePrice !== undefined && !isNaN(Number(coursePrice)) && { coursePrice: Number(coursePrice) }),
+      ...(courseThumbnail && { courseThumbnail }),
     };
 
+    // Update the course
     course = await Course.findByIdAndUpdate(courseId, updateData, {
       new: true,
     });
-
-    // ✅ Delete the uploaded file from local storage
-    if (thumbnail) {
-      fs.unlinkSync(thumbnail.path);
-    }
 
     return res.status(200).json({
       course,
       message: "Course updated successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
-      message: "Failed to get course",
+      message: "Failed to update course",
     });
   }
 };
+
 
 export const getCourseById = async (req, res) => {
   try {
@@ -293,29 +324,27 @@ export const getLectureById = async (req, res) => {
 };
 
 // published unPublished coures
-export const togglePublishedCourse = async(req,res) => {
+export const togglePublishedCourse = async (req, res) => {
   try {
-    const {courseId} = req.params;
-    const {publish} = req.query; // true false
+    const { courseId } = req.params;
+    const { publish } = req.query; // true false
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(404).json({
-        message:"course not found"
+        message: "course not found",
       });
-      
     }
     course.isPublished = publish === "true";
     await course.save();
-    const statusMessage = course.isPublished ? "Published" : "Unpublished"
+    const statusMessage = course.isPublished ? "Published" : "Unpublished";
     return res.status(200).json({
-      message: `Course is ${statusMessage}`
-    })
-
+      message: `Course is ${statusMessage}`,
+    });
   } catch (error) {
     console.log(error);
-    
+
     return res.status(500).json({
       message: "Failed to update status",
     });
   }
-}
+};
