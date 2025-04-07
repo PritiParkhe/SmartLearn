@@ -1,3 +1,4 @@
+import { publicDecrypt } from "crypto";
 import { Course } from "../models/course_model.js";
 import { Lecture } from "../models/lecture_model.js";
 import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
@@ -290,3 +291,31 @@ export const getLectureById = async (req, res) => {
     });
   }
 };
+
+// published unPublished coures
+export const togglePublishedCourse = async(req,res) => {
+  try {
+    const {courseId} = req.params;
+    const {publish} = req.query; // true false
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({
+        message:"course not found"
+      });
+      
+    }
+    course.isPublished = publish === "true";
+    await course.save();
+    const statusMessage = course.isPublished ? "Published" : "Unpublished"
+    return res.status(200).json({
+      message: `Course is ${statusMessage}`
+    })
+
+  } catch (error) {
+    console.log(error);
+    
+    return res.status(500).json({
+      message: "Failed to update status",
+    });
+  }
+}
