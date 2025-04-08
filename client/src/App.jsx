@@ -14,7 +14,8 @@ import AddNewCourse from "./pages/admin/course/AddNewCourse";
 import EditCourse from "./pages/admin/course/EditCourse";
 import CreateLecture from "./pages/admin/Lecture/CreateLecture";
 import EditLecture from "./pages/admin/Lecture/EditLecture";
-
+import CourseDetail from "./pages/student/CourseDetail";
+import CourseProgress from "./pages/student/CourseProgress";
 
 const appRouter = createBrowserRouter([
   {
@@ -26,57 +27,61 @@ const appRouter = createBrowserRouter([
         element: (
           <>
             <HeroSection />
-            <Courses/>
+            <Courses />
           </>
         ),
       },
       {
         path: "login",
-        element:<Login/>
-
+        element: <Login />,
       },
       {
         path: "my-learning",
-        element:<MyLearning/>
-
+        element: <MyLearning />,
       },
       {
         path: "profile",
-        element:<Profile/>
-
+        element: <Profile />,
+      },
+      {
+        path: "course-detail/:courseId",
+        element: <CourseDetail />,
+      },
+      {
+        path: "course-progress/:courseId",
+        element: <CourseProgress />,
       },
       // admin routes
       {
-        path:"admin",
-        element:<Sidebar/>,
-        children:[
+        path: "admin",
+        element: <Sidebar />,
+        children: [
           {
-            path:"dashboard",
-            element:<Dashboard/>
+            path: "dashboard",
+            element: <Dashboard />,
           },
           {
-            path:"course",
-            element:<CourseTable/>
+            path: "course",
+            element: <CourseTable />,
           },
           {
-            path:"course/create",
-            element:<AddNewCourse/>
+            path: "course/create",
+            element: <AddNewCourse />,
           },
           {
-            path:"course/:courseId",
-            element:<EditCourse/>
+            path: "course/:courseId",
+            element: <EditCourse />,
           },
           {
-            path:"course/:courseId/lecture",
-            element:<CreateLecture/>
+            path: "course/:courseId/lecture",
+            element: <CreateLecture />,
           },
           {
             path: "course/:courseId/lecture/:lectureId",
             element: <EditLecture />,
           },
-
-        ]
-      }
+        ],
+      },
     ],
   },
 ]);
@@ -84,7 +89,7 @@ const appRouter = createBrowserRouter([
 function App() {
   return (
     <main>
-      <RouterProvider router={appRouter}/>
+      <RouterProvider router={appRouter} />
     </main>
   );
 }
