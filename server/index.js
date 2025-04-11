@@ -7,6 +7,7 @@ import userRoute from "./routes/user_routes.js";
 import courseRoute from "./routes/course_routes.js";
 import mediaRoute from "./routes/media_routes.js";
 import purchaseRoute from "./routes/purchase_routes.js";
+import courseProgressRoute from "./routes/courseProgress_routes.js";
 
 dotenv.config({});
 
@@ -29,6 +30,7 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/course", courseRoute);
 app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/purchase", purchaseRoute);
+app.use("/api/v1/progress", courseProgressRoute);
 
 connnectDB().then(() => {
   app.listen(PORT, () => {
