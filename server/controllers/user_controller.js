@@ -66,14 +66,14 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Incoreect email or password",
+        message: "Incorrect email or password",
       });
     }
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
       return res.status(500).json({
         success: false,
-        message: "Incoreect password",
+        message: "Incorrect password",
       });
     }
     generateToken(res, user, `welcome back ${user.name}`);
