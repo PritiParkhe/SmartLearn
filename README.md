@@ -1,19 +1,31 @@
 ```markdown
 # SmartLearn
 
-SmartLearn is a modern e-learning platform designed to provide seamless course consumption, interactive quizzes, and personalized dashboards. Built using the **MERN Stack** (MongoDB, Express.js, React.js, Node.js), it allows users to access courses, track progress, and take part in an immersive learning experience.
+SmartLearn is a simple yet effective Learning Management System designed to streamline the learning experience for both students and instructors. It offers features like course creation, enrollment, lecture material upload/viewing, quizzes, progress tracking, and more — all in a clean and user-friendly interface.
+To add a **demo link** to your SmartLearn LMS README, include it prominently near the top so users can quickly access it. Here’s how you can format it:
+
+---
+
+## 🔗 Live Demo
+
+**🌐 [SmartLearn LMS – Live Demo](https://smart-learn-orpin.vercel.app)**
+
+> Explore the platform as a student or instructor.
+> *(Demo login: [student@example.com](mailto:student@example.com) / [instructor@example.com](mailto:instructor@example.com) – password: `demo123`)*
+
 
 ## Features
 
-- **User Authentication**: Secure login and signup using JWT-based authentication.
-- **Course Catalog**: Browse and filter courses across various categories.
-- **Course Enrollment**: Enroll in courses and track progress.
-- **Dashboard**: Personalized user dashboard displaying enrolled courses and progress.
-- **Interactive Quizzes**: Take quizzes at the end of courses to test your knowledge.
-- **Admin Panel**: Admins can add, update, and delete courses.
-- **Course Management**: Upload videos, documents, and other learning materials.
-- **Responsive Design**: Fully responsive UI for a seamless experience across devices.
-- **Stripe Integration**: Secure payment gateway for purchasing premium courses.
+- 👨‍🏫 Instructor & Student Roles – Role-based access to manage or enroll in courses.
+- 📚 Course Creation & Enrollment – Instructors can create courses; students can enroll easily.
+- 📄 Lecture Materials Upload/View – Upload or access PDFs, videos, and more.
+- ✅ Quizzes & Assignments – Students can submit work; instructors can grade.
+- 📈 Track Student Progress – Visualize completion and performance metrics.
+- 🔒 Secure Authentication – JWT-based user login, register, and session handling.
+- 📑 Course & Lecture Management – Instructors can edit/delete course content.
+- 🔍 Search & Filter Courses – Find relevant courses quickly using keywords/categories.
+- 🏅 Progress Tracking – Students mark completed lectures; instructors see progress.
+- 🌗 Light/Dark Mode – Personalized theme toggle saved across sessions.
 
 ## Tech Stack
 
@@ -49,7 +61,7 @@ npm install
 #### Frontend
 
 ```bash
-cd frontend
+cd client
 npm install
 ```
 
@@ -101,27 +113,28 @@ This will start the frontend on **http://localhost:3000**.
 
 ### Home Page
 
-![Home Page](https://example.com/homepage-screenshot.png)
+![Home Page](./client/src/assets/homepage.png)
+![Home Page](./client/src/assets/homepagedarktheme.png)
 
 ### Course Catalog
 
-![Course Catalog](https://example.com/course-catalog-screenshot.png)
+![Course Catalog](./client/src/assets/courses.png)
 
 ### Dashboard
 
-![Dashboard](https://example.com/dashboard-screenshot.png)
+![Dashboard](./client/src/assets/dashboard.png)
 
 ### Course Details
 
-![Course Details](https://example.com/course-details-screenshot.png)
+![Course Details](./client/src/assets/coursedetail.png)
 
 ## Roadmap
-
-- **Add Real-Time Chat**: Implement a feature to communicate with instructors and peers in real-time.
-- **Interactive Certificates**: Generate certificates upon course completion.
-- **Live Sessions**: Enable live streaming sessions for instructors.
-- **Community Features**: Integrate discussion forums for better collaboration.
-- **Multi-Language Support**: Add support for multiple languages to cater to a global audience.
+Roadmap
+✅ Real-time notifications
+⏳ Chat & discussion forums
+⏳ Admin dashboard for system analytics
+⏳ Mobile app integration (React Native)
+⏳ Multi-Language Support**: Add support for multiple languages to cater to a global audience.
 
 ## Contributing
 
