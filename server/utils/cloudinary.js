@@ -1,36 +1,35 @@
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 dotenv.config({});
+
+// Validate required env vars at startup
+const requiredEnvVars = ["API_KEY", "API_SECRET", "CLOUDINARY_NAME"];
+requiredEnvVars.forEach((key) => {
+  if (!process.env[key]) {
+    throw new Error(`Missing environment variable: ${key}`);
+  }
+});
+
 cloudinary.config({
   api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRTET,
+  api_secret: process.env.API_SECRET,
   cloud_name: process.env.CLOUDINARY_NAME,
 });
 
 export const uploadMedia = async (file) => {
-  try {
-    const uploadResponse = await cloudinary.uploader.upload(file, {
-      resource_type: "auto",
-    });
-    return uploadResponse; // ✅ Return the response
-  } catch (error) {
-    console.log("Cloudinary Upload Error:", error);
-    return null; // ✅ Handle errors gracefully
-  }
+  const uploadResponse = await cloudinary.uploader.upload(file, {
+    resource_type: "auto",
+  });
+  return uploadResponse;
 };
 
+// Guard against empty publicId
 export const deleteMediaFromCloudinary = async (publicId) => {
-  try {
-    await cloudinary.uploader.destroy(publicId);
-  } catch (error) {
-    console.log(error);
-  }
+  if (!publicId) return;
+  await cloudinary.uploader.destroy(publicId);
 };
 
 export const deleteVideoFromCloudinary = async (publicId) => {
-  try {
-    await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
-  } catch (error) {
-    console.log(error);
-  }
+  if (!publicId) return;
+  await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
 };

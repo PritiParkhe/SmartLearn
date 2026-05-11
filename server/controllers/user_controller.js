@@ -3,7 +3,8 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
 import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 import fs from "fs";
-const saltRounds = 10;
+
+// ─── REGISTER ────────────────────────────────────────────────────────────────
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -14,181 +15,208 @@ export const register = async (req, res) => {
         message: "All fields are required.",
       });
     }
-    const user = await User.findOne({ email });
-    if (user) {
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "User already exists with this email.",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.create({ name, email, password: hashedPassword });
+
+    return res.status(201).json({
+      success: true,
+      message: "Account created successfully.",
+    });
+
+  } catch (error) {
+    //  Mongoose validation error — bad email format, short password, etc.
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((e) => e.message);
       return res.status(400).json({
         success: false,
-        message: "User alredy exist with this email.",
+        message: messages[0], 
       });
     }
-    try {
-      const salt = bcrypt.genSaltSync(saltRounds);
-      const hashed = bcrypt.hashSync(password, salt);
 
-      if (!hashed) {
-        throw new Error(`Something went wrong`);
-      }
-      await User.create({
-        name,
-        email,
-        password: hashed,
-      });
-      return res.status(201).json({
-        success: true,
-        message: "Account created successfully.",
-      });
-    } catch (error) {
-      console.log("error in hasedPassword", error);
-      return res.status(500).json({
+    //  Mongoose duplicate key error — race condition on unique email
+    if (error.code === 11000) {
+      return res.status(409).json({
         success: false,
-        message: "Something went wrong",
+        message: "User already exists with this email.",
       });
     }
-  } catch (error) {
-    console.log("error in register", error);
+
+    // everything else is a genuine server error
+    console.error("Error in register:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to register",
+      message: "Failed to register.",
     });
   }
 };
 
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: "All fields are required.",
       });
     }
-    const user = await User.findOne({ email });
+
+    // select("+password") needed because schema has select: false on password
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: "Incorrect email or password",
+        message: "Incorrect email or password.",
       });
     }
+
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) {
-      return res.status(500).json({
+      return res.status(401).json({
         success: false,
-        message: "Incorrect password",
+        message: "Incorrect email or password.",
       });
     }
-    generateToken(res, user, `welcome back ${user.name}`);
+
+    generateToken(res, user, `Welcome back ${user.name}`);
   } catch (error) {
-    console.log("error in login", error);
+    console.error("Error in login:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to login",
+      message: "Failed to login.",
     });
   }
 };
 
+// ─── LOGOUT ──────────────────────────────────────────────────────────────────
 export const logout = async (_, res) => {
   try {
-    return res.status(200).cookie("token", "", { maxAge: 0 }).json({
-      message: "Logged out successfully",
-      success: true,
-    });
+    const isProduction = process.env.NODE_ENV === "production";
+
+    return res
+      .status(200)
+      .cookie("token", "", {
+        httpOnly: true,
+        sameSite: isProduction ? "None" : "Lax",
+        secure: isProduction,
+        maxAge: 0, // expire immediately
+      })
+      .json({
+        success: true,
+        message: "Logged out successfully.",
+      });
   } catch (error) {
-    console.log("error in logout", error);
+    console.error("Error in logout:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to logout",
+      message: "Failed to logout.",
     });
   }
 };
 
+// ─── GET PROFILE ──────────────────────────────────────────────────────────────
 export const getUserProfile = async (req, res) => {
   try {
     const userId = req.id;
+
     const user = await User.findById(userId)
       .select("-password")
-      .populate("enrolledCourses");
+      .populate("enrolledCourses", "title thumbnail price category");
+
     if (!user) {
       return res.status(404).json({
-        message: "Profile not found",
         success: false,
+        message: "User not found.",
       });
     }
+
     return res.status(200).json({
       success: true,
       user,
     });
   } catch (error) {
-    console.log("error in getting userprofile", error);
+    console.error("Error in getUserProfile:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to find user",
+      message: "Failed to fetch profile.",
     });
   }
 };
 
+// ─── UPDATE PROFILE ───────────────────────────────────────────────────────────
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.id;
     const { name } = req.body;
     const profilePhoto = req.file;
 
-    // console.log(userId, name, profilePhoto);
-
-    // Check if file exists
-    if (!profilePhoto) {
-      return res.status(400).json({
-        success: false,
-        message: "Profile photo is required",
-      });
-    }
-
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
-        message: "User not found",
         success: false,
+        message: "User not found.",
       });
     }
 
-    // ✅ Delete old image from Cloudinary if it exists
-    if (user.photoUrl) {
-      const publicId = user.photoUrl.split("/").pop().split(".")[0]; // Extract public ID
-      await deleteMediaFromCloudinary(publicId);
+    let photoUrl = user.photoUrl;
+    let photoPublicId = user.photoPublicId;
+
+    if (profilePhoto) {
+      try {
+        // Delete old photo from Cloudinary using stored publicId
+        if (user.photoPublicId) {
+          await deleteMediaFromCloudinary(user.photoPublicId);
+        }
+
+        const cloudResponse = await uploadMedia(profilePhoto.path);
+
+        if (!cloudResponse?.secure_url) {
+          return res.status(500).json({
+            success: false,
+            message: "Failed to upload profile photo.",
+          });
+        }
+
+        photoUrl = cloudResponse.secure_url;
+        photoPublicId = cloudResponse.public_id; // store for future deletion
+      } finally {
+        // Always clean up temp file — even if Cloudinary fails
+        if (profilePhoto?.path && fs.existsSync(profilePhoto.path)) {
+          fs.unlinkSync(profilePhoto.path);
+        }
+      }
     }
 
-    // Upload new photo
+    // Only update fields that were actually provided
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (photoUrl) updateData.photoUrl = photoUrl;
+    if (photoPublicId) updateData.photoPublicId = photoPublicId;
 
-    const cloudResponse = await uploadMedia(profilePhoto.path);
-    //handelling cloudresponse if it fails
-    if (!cloudResponse || !cloudResponse.secure_url) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to upload profile photo",
-      });
-    }
-    const photoUrl = cloudResponse.secure_url;
-
-    // ✅ Delete the uploaded file from local storage
-    fs.unlinkSync(profilePhoto.path);
-
-    // console.log(cloudResponse, "cloudres");
-    // console.log(cloudResponse.secure_url, "cloudres");
-
-    const updateData = { name, photoUrl };
-    const updateUser = await User.findByIdAndUpdate(userId, updateData, {
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     }).select("-password");
 
     return res.status(200).json({
       success: true,
-      user: updateUser,
-      message: "Profile updated successfully",
+      user: updatedUser,
+      message: "Profile updated successfully.",
     });
   } catch (error) {
     console.error("Error in updateProfile:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to update profile",
+      message: "Failed to update profile.",
     });
   }
 };
