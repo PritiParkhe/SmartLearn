@@ -17,18 +17,16 @@ import ReactPlayer from "react-player";
 import { useNavigate, useParams } from "react-router-dom";
 
 const CourseDetail = () => {
-  const params = useParams();
-  const courseId = params.courseId;
+  const { courseId } = useParams();
   const navigate = useNavigate();
   const { data, isLoading, isError } =
     useGetCourseDetailWithStatusQuery(courseId);
+  if (isLoading) return <p>Loading course details...</p>;
+  if (isError || !data) return <p>Something went wrong. Please try again.</p>;
 
-  if (isLoading) return <h1>Loading...</h1>;
-  if (isError) return <h>Failed to load course details</h>;
+  
 
   const { course, purchased } = data;
-  console.log(purchased);
-
   const handleContinueCourse = () => {
     if(purchased){
       navigate(`/course-progress/${courseId}`)

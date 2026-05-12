@@ -2,8 +2,10 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { userLoggedIn, userLoggedOut } from "../authSlice";
 
 const USER_API = `${import.meta.env.VITE_BACKEND_URL}/user`;
+
 export const authApi = createApi({
   reducerPath: "authApi",
+  tagTypes: ["UserProfile"],
   baseQuery: fetchBaseQuery({
     baseUrl: USER_API,
     credentials: "include",
@@ -16,6 +18,7 @@ export const authApi = createApi({
         body: inputData,
       }),
     }),
+
     loginUser: builder.mutation({
       query: (inputData) => ({
         url: "login",
@@ -27,35 +30,38 @@ export const authApi = createApi({
           const result = await queryFulfilled;
           dispatch(userLoggedIn({ user: result.data.user }));
         } catch (error) {
-          console.log(error);
+          console.error("Login error:", error);
         }
       },
     }),
+
     logoutUser: builder.mutation({
       query: () => ({
         url: "logout",
-        method: "GET",
+        method: "POST",
       }),
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
+          await queryFulfilled;
           dispatch(userLoggedOut());
         } catch (error) {
-          console.log(error);
+          console.error("Logout error:", error);
         }
       },
     }),
+
     loadUser: builder.query({
       query: () => ({
         url: "profile",
         method: "GET",
       }),
+      providesTags: ["UserProfile"],
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
-          console.log("Loaded user:", result.data);
           dispatch(userLoggedIn({ user: result.data.user }));
         } catch (error) {
-          console.log("Error loading user:", error);
+          dispatch(userLoggedOut()); 
         }
       },
     }),
@@ -65,15 +71,16 @@ export const authApi = createApi({
         url: "profile/update",
         method: "PUT",
         body: formData,
-        credentials: "include",
       }),
+      invalidatesTags: ["UserProfile"],  
     }),
   }),
 });
+
 export const {
   useRegisterUserMutation,
   useLoginUserMutation,
+  useLogoutUserMutation,
   useLoadUserQuery,
   useUpdateUserMutation,
-  useLogoutUserMutation,
 } = authApi;

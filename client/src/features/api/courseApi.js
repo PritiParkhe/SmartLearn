@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const COURSE_API = `${import.meta.env.VITE_BACKEND_URL}/course`;
+
 export const courseApi = createApi({
   reducerPath: "courseApi",
   tagTypes: ["Refetch_Creator_Course", "Refetch_Lecture"],
@@ -17,41 +18,35 @@ export const courseApi = createApi({
       }),
       invalidatesTags: ["Refetch_Creator_Course"],
     }),
-    getSearchCourse:builder.query({
-      query: ({searchQuery, categories, sortByPrice}) => {
-        // Build qiery string
-        let queryString = `/search?query=${encodeURIComponent(searchQuery)}`
 
-        // append cateogry 
-        if(categories && categories.length > 0) {
-          const categoriesString = categories.map(encodeURIComponent).join(",");
-          queryString += `&categories=${categoriesString}`; 
+    getSearchCourse: builder.query({
+      query: ({ searchQuery, categories, sortByPrice }) => {
+        let queryString = `/search?query=${encodeURIComponent(searchQuery)}`;
+
+        // each category as separate param — backend [].concat() handles it
+        if (categories && categories.length > 0) {
+          categories.forEach((cat) => {
+            queryString += `&categories=${encodeURIComponent(cat)}`;
+          });
         }
 
-        // Append sortByPrice is available
-        if(sortByPrice){
-          queryString += `&sortByPrice=${encodeURIComponent(sortByPrice)}`; 
+        if (sortByPrice) {
+          queryString += `&sortByPrice=${encodeURIComponent(sortByPrice)}`;
         }
 
-        return {
-          url:queryString,
-          method:"GET", 
-        }
-      }
+        return { url: queryString, method: "GET" };
+      },
     }),
+
     getPublishedCourses: builder.query({
-      query: () => ({
-        url: "/published-courses",
-        method: "GET",
-      }),
+      query: () => ({ url: "/published-courses", method: "GET" }),
     }),
+
     getCourse: builder.query({
-      query: () => ({
-        url: "",
-        method: "GET",
-      }),
+      query: () => ({ url: "", method: "GET" }),
       providesTags: ["Refetch_Creator_Course"],
     }),
+
     editCourse: builder.mutation({
       query: ({ formData, courseId }) => ({
         url: `/${courseId}`,
@@ -60,26 +55,25 @@ export const courseApi = createApi({
       }),
       invalidatesTags: ["Refetch_Creator_Course"],
     }),
+
     getCourseById: builder.query({
-      query: (courseId) => ({
-        url: `/${courseId}`,
-        method: "GET",
-      }),
+      query: (courseId) => ({ url: `/${courseId}`, method: "GET" }),
     }),
+
     createLecture: builder.mutation({
       query: ({ lectureTitle, courseId }) => ({
         url: `/${courseId}/lecture`,
         method: "POST",
         body: { lectureTitle },
       }),
+      invalidatesTags: ["Refetch_Lecture"],
     }),
+
     getCourseLecture: builder.query({
-      query: (courseId) => ({
-        url: `/${courseId}/lecture`,
-        method: "GET",
-      }),
+      query: (courseId) => ({ url: `/${courseId}/lecture`, method: "GET" }),
       providesTags: ["Refetch_Lecture"],
     }),
+
     editLecture: builder.mutation({
       query: ({
         lectureTitle,
@@ -89,10 +83,12 @@ export const courseApi = createApi({
         lectureId,
       }) => ({
         url: `/${courseId}/lecture/${lectureId}`,
-        method: "POST",
+        method: "PUT",
         body: { lectureTitle, videoInfo, isPreviewFree },
       }),
+      invalidatesTags: ["Refetch_Lecture"],
     }),
+
     removeLecture: builder.mutation({
       query: (lectureId) => ({
         url: `/lecture/${lectureId}`,
@@ -100,17 +96,17 @@ export const courseApi = createApi({
       }),
       invalidatesTags: ["Refetch_Lecture"],
     }),
+
     getLecturebyId: builder.query({
-      query: (lectureId) => ({
-        url: `/lecture/${lectureId}`,
-        method: "GET",
-      }),
+      query: (lectureId) => ({ url: `/lecture/${lectureId}`, method: "GET" }),
     }),
+
     publishedCourse: builder.mutation({
       query: ({ courseId, query }) => ({
         url: `/${courseId}?publish=${query}`,
         method: "PATCH",
       }),
+      invalidatesTags: ["Refetch_Creator_Course"],
     }),
   }),
 });
