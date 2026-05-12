@@ -1,32 +1,32 @@
-import express from "express";
-import upload from "../utils/multer.js";
+// controllers/media_controller.js
 import { uploadMedia } from "../utils/cloudinary.js";
 import fs from "fs";
 
-const router = express.Router();
-
-router.route("/upload-video").post(upload.single("file"), async (req, res) => {
+export const uploadVideo = async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file provided",
+      });
+    }
+
     const result = await uploadMedia(req.file.path);
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       message: "File uploaded successfully.",
       data: result,
     });
-    // Safe delete file from storage
-     
-     try {
-      fs.unlinkSync(req.file.path);
-      // console.log("file deleted successfully");
-      
-    } catch (err) {
-      console.error("Error deleting temp file:", err.message);
-    }
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
+    console.error("Error uploading file:", error);
+    return res.status(500).json({
+      success: false,
       message: "Error uploading file",
     });
+  } finally {
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
   }
-});
-export default router;
+};
