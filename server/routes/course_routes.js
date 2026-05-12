@@ -1,5 +1,6 @@
 import express from "express";
 import isAuthenticated from "../middleware/isAuthenticated.js";
+import { authorizeRole } from "../middleware/authorizeRole.js";
 import {
   createCourse,
   createLecture,
@@ -18,22 +19,63 @@ import upload from "../utils/multer.js";
 
 const router = express.Router();
 
-router.route("/").post(isAuthenticated, createCourse);
-router.route("/search").get(isAuthenticated, searchCourse);
+// ─────────────────────────────────────────
+//  USER — Static
+// ─────────────────────────────────────────
+router.get("/published-courses", getPublishedCourse);
+router.get("/search", isAuthenticated, searchCourse);
 
-router.route("/published-courses").get(getPublishedCourse);
-router.route("/").get(isAuthenticated, getCreatorCourses);
-router
-  .route("/:courseId")
-  .put(isAuthenticated, upload.single("courseThumbnail"), editCourse);
-router.route("/:courseId").get(isAuthenticated, getCourseById);
-router.route("/:courseId/lecture").post(isAuthenticated, createLecture);
-router.route("/:courseId/lecture").get(isAuthenticated, getCourseLecture);
-router
-  .route("/:courseId/lecture/:lectureId")
-  .post(isAuthenticated, editLecture);
-router.route("/lecture/:lectureId").delete(isAuthenticated, removeLecture);
-router.route("/lecture/:lectureId").get(isAuthenticated, getLectureById);
-router.route("/:courseId").patch(isAuthenticated, togglePublishedCourse);
+// ─────────────────────────────────────────
+//  USER — Dynamic
+// ─────────────────────────────────────────
+router.get("/:courseId", isAuthenticated, getCourseById);
+router.get("/:courseId/lecture", isAuthenticated, getCourseLecture);
+router.get("/lecture/:lectureId", isAuthenticated, getLectureById);
+
+// ─────────────────────────────────────────
+//  INSTRUCTOR — Static
+// ─────────────────────────────────────────
+router.post("/", isAuthenticated, authorizeRole("instructor"), createCourse);
+router.get(
+  "/",
+  isAuthenticated,
+  authorizeRole("instructor"),
+  getCreatorCourses,
+);
+
+// ─────────────────────────────────────────
+//  INSTRUCTOR — Dynamic
+// ─────────────────────────────────────────
+router.post(
+  "/:courseId/lecture",
+  isAuthenticated,
+  authorizeRole("instructor"),
+  createLecture,
+);
+router.put(
+  "/:courseId/lecture/:lectureId",
+  isAuthenticated,
+  authorizeRole("instructor"),
+  editLecture,
+);
+router.put(
+  "/:courseId",
+  isAuthenticated,
+  authorizeRole("instructor"),
+  upload.single("courseThumbnail"),
+  editCourse,
+);
+router.patch(
+  "/:courseId",
+  isAuthenticated,
+  authorizeRole("instructor"),
+  togglePublishedCourse,
+);
+router.delete(
+  "/lecture/:lectureId",
+  isAuthenticated,
+  authorizeRole("instructor"),
+  removeLecture,
+);
 
 export default router;

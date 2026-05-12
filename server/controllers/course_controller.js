@@ -1,7 +1,11 @@
-import { publicDecrypt } from "crypto";
+import mongoose from "mongoose";
 import { Course } from "../models/course_model.js";
 import { Lecture } from "../models/lecture_model.js";
-import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
+import {
+  deleteVideoFromCloudinary,
+  deleteMediaFromCloudinary,
+  uploadMedia,
+} from "../utils/cloudinary.js";
 import fs from "fs";
 
 export const createCourse = async (req, res) => {
@@ -39,12 +43,6 @@ export const getPublishedCourse = async (_, res) => {
       select: "name photoUrl",
     });
 
-    if (!courses || courses.length === 0) {
-      return res.status(404).json({
-        message: "No published courses found",
-      });
-    }
-
     return res.status(200).json({ courses });
   } catch (error) {
     console.error("Error fetching published courses:", error.message);
@@ -58,12 +56,7 @@ export const getCreatorCourses = async (req, res) => {
   try {
     const userId = req.id;
     const courses = await Course.find({ creator: userId });
-    if (!courses) {
-      return res.status(404).json({
-        courses: [],
-        message: "Courses not found",
-      });
-    }
+
     return res.status(200).json({
       courses,
     });
@@ -99,21 +92,24 @@ export const editCourse = async (req, res) => {
 
     // Default to existing thumbnail
     let courseThumbnail = course.courseThumbnail;
+    let courseThumbnailPublicId = course.courseThumbnailPublicId;
 
     // If a new thumbnail was uploaded
     if (thumbnail) {
       // Delete the old thumbnail from Cloudinary
-      if (courseThumbnail) {
-        const publicId = courseThumbnail.split("/").pop().split(".")[0];
-        await deleteMediaFromCloudinary(publicId);
+      if (course.courseThumbnailPublicId) {
+        await deleteMediaFromCloudinary(course.courseThumbnailPublicId);
       }
 
-      // Upload the new one
-      const uploaded = await uploadMedia(thumbnail.path);
-      courseThumbnail = uploaded?.secure_url;
-
-      // Delete local file
-      fs.unlinkSync(thumbnail.path);
+      try {
+        const uploaded = await uploadMedia(thumbnail.path);
+        courseThumbnail = uploaded.secure_url;
+        courseThumbnailPublicId = uploaded.public_id;
+      } finally {
+        if (thumbnail?.path && fs.existsSync(thumbnail.path)) {
+          fs.unlinkSync(thumbnail.path);
+        }
+      }
     }
 
     // Prepare update data, with validation
@@ -123,8 +119,10 @@ export const editCourse = async (req, res) => {
       ...(description && { description }),
       ...(category && { category }),
       ...(courseLevel && { courseLevel }),
-      ...(coursePrice !== undefined && !isNaN(Number(coursePrice)) && { coursePrice: Number(coursePrice) }),
+      ...(coursePrice !== undefined &&
+        !isNaN(Number(coursePrice)) && { coursePrice: Number(coursePrice) }),
       ...(courseThumbnail && { courseThumbnail }),
+      ...(courseThumbnailPublicId && { courseThumbnailPublicId }),
     };
 
     // Update the course
@@ -144,17 +142,13 @@ export const editCourse = async (req, res) => {
   }
 };
 
-
 export const getCourseById = async (req, res) => {
   try {
     const { courseId } = req.params;
-    // console.log("Course ID received:", courseId); // Debugging output
 
     // Validate courseId
-    if (!courseId || courseId.length !== 24) {
-      return res.status(400).json({
-        message: "Invalid course ID",
-      });
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ message: "Invalid course ID" });
     }
 
     const course = await Course.findById(courseId);
@@ -168,7 +162,7 @@ export const getCourseById = async (req, res) => {
       course,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching course by ID:", error.message);
     return res.status(500).json({
       message: "Failed to get course by id",
     });
@@ -238,7 +232,7 @@ export const editLecture = async (req, res) => {
     const { courseId, lectureId } = req.params;
 
     const lecture = await Lecture.findById(lectureId);
-    if (!lectureId) {
+    if (!lecture) {
       return res.status(404).json({
         message: "Lecture not found",
       });
@@ -251,18 +245,18 @@ export const editLecture = async (req, res) => {
 
     await lecture.save();
 
-    // Ensur course  still has the lecture id if was not already added
+    // Ensure course still has the lecture id if it was not already added
     const course = await Course.findById(courseId);
-    if (course && !course.lectures.includes(lecture._id)) {
+    if (course && !course.lectures.some((id) => id.equals(lecture._id))) {
       course.lectures.push(lecture._id);
-      await Course.save();
+      await course.save();
     }
     return res.status(200).json({
       lecture,
       message: "Lecture updated successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return res.status(500).json({
       message: "Failed to edit lecture",
@@ -273,15 +267,15 @@ export const editLecture = async (req, res) => {
 export const removeLecture = async (req, res) => {
   try {
     const { lectureId } = req.params;
-    const lecture = Lecture.findByIdAndDelete(lectureId);
+    const lecture = await Lecture.findByIdAndDelete(lectureId);
     if (!lecture) {
-      return res.status(400).json({
+      return res.status(404).json({
         message: "Lecture not found",
       });
     }
     // delete lecture from cloudinary
     if (lecture.publicId) {
-      await deleteMediaFromCloudinary(lecture.publicId);
+      await deleteVideoFromCloudinary(lecture.publicId);
     }
     // remove lecture reference from associated course
     await Course.updateOne(
@@ -290,13 +284,14 @@ export const removeLecture = async (req, res) => {
       }, // find the course contens lecture
       {
         $pull: { lectures: lectureId }, // remove the lecture id from the lecture array
-      }
+      },
     );
 
     return res.status(200).json({
-      message: "Lecture remove successfully",
+      message: "Lecture removed successfully",
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       message: "Failed to remove lecture",
     });
@@ -349,43 +344,45 @@ export const togglePublishedCourse = async (req, res) => {
   }
 };
 
-export const searchCourse = async (req,res) => {
+export const searchCourse = async (req, res) => {
   try {
-      const {query = "", categories = [], sortByPrice =""} = req.query;
-      console.log(categories);
-      
-      // create search query
-      const searchCriteria = {
-          isPublished:true,
-          $or:[
-              {courseTitle: {$regex:query, $options:"i"}},
-              {subTitle: {$regex:query, $options:"i"}},
-              {category: {$regex:query, $options:"i"}},
-          ]
-      }
+    const { query = "", sortByPrice = "" } = req.query;
 
-      // if categories selected
-      if(categories.length > 0) {
-          searchCriteria.category = {$in: categories};
-      }
+    // normalize — single value comes as string, multiple as array
+    const categories = req.query.categories
+      ? [].concat(req.query.categories)
+      : [];
 
-      // define sorting order
-      const sortOptions = {};
-      if(sortByPrice === "low"){
-          sortOptions.coursePrice = 1;//sort by price in ascending
-      }else if(sortByPrice === "high"){
-          sortOptions.coursePrice = -1; // descending
-      }
+    const searchCriteria = {
+      isPublished: true,
+      $or: [
+        { courseTitle: { $regex: query, $options: "i" } },
+        { subTitle: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+      ],
+    };
 
-      let courses = await Course.find(searchCriteria).populate({path:"creator", select:"name photoUrl"}).sort(sortOptions);
+    if (categories.length > 0) {
+      searchCriteria.category = { $in: categories };
+    }
 
-      return res.status(200).json({
-          success:true,
-          courses: courses || []
-      });
+    const sortOptions = {};
+    if (sortByPrice === "low") sortOptions.coursePrice = 1;
+    else if (sortByPrice === "high") sortOptions.coursePrice = -1;
 
+    const courses = await Course.find(searchCriteria)
+      .populate({ path: "creator", select: "name photoUrl" })
+      .sort(sortOptions);
+
+    return res.status(200).json({
+      success: true,
+      courses: courses || [],
+    });
   } catch (error) {
-      console.log(error);
-      
+    console.error("Error in searchCourse:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to search courses",
+    });
   }
-}
+};
