@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-const CoursePurchaseCourse = new mongoose.Schema(
+
+const coursePurchaseSchema = new mongoose.Schema(
   {
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -22,9 +23,15 @@ const CoursePurchaseCourse = new mongoose.Schema(
     },
     paymentId: {
       type: String,
-      required: true,
+      default: "", // set after Stripe session creation
     },
   },
   { timestamps: true }
 );
-export const CoursePurchase = mongoose.model("Purchase", CoursePurchaseCourse);
+
+// indexes for frequent queries
+coursePurchaseSchema.index({ userId: 1, courseId: 1 });
+coursePurchaseSchema.index({ status: 1 });
+coursePurchaseSchema.index({ paymentId: 1 }); 
+
+export const CoursePurchase = mongoose.model("Purchase", coursePurchaseSchema);

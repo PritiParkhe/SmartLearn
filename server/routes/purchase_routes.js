@@ -1,11 +1,35 @@
 import express from "express";
 import isAuthenticated from "../middleware/isAuthenticated.js";
-import { createCheckoutSession,   getAllPurchasedCourse,   getCourseDetailWithPurchaseStatus,   stripeWebhook } from "../controllers/coursePurschase_controller.js";
+import authorizeRole from "../middleware/authorizeRole.js";
+import {
+  createCheckoutSession,
+  getAllPurchasedCourse,
+  getMyPurchasedCourses,
+  getPurchaseStatus,
+  getCourseDetailWithPurchaseStatus,
+  stripeWebhook,
+} from "../controllers/coursePurchase_controller.js";
+
 const router = express.Router();
 
-router.route("/checkout/create-checkout-session").post(isAuthenticated, createCheckoutSession)
-router.route("/webhook").post(express.raw({type:"application/json"}),stripeWebhook)
-router.route("/course/:courseId/detail-with-status").get(isAuthenticated,getCourseDetailWithPurchaseStatus);
+// ── Webhook ──────────────────────────────────────────────
+router.route("/webhook").post(stripeWebhook);
 
-router.route("/").get(isAuthenticated,getAllPurchasedCourse)
+// ── Student routes ────────────────────────────────────────
+router.route("/checkout/create-checkout-session")
+  .post(isAuthenticated, createCheckoutSession);
+
+router.route("/my-courses")
+  .get(isAuthenticated, getMyPurchasedCourses);
+
+router.route("/course/:courseId/status")
+  .get(isAuthenticated, getPurchaseStatus);
+
+router.route("/course/:courseId/detail-with-status")
+  .get(isAuthenticated, getCourseDetailWithPurchaseStatus);
+
+// ── Admin routes ──────────────────────────────────────────
+router.route("/")
+  .get(isAuthenticated, authorizeRole("admin"), getAllPurchasedCourse);
+
 export default router;
