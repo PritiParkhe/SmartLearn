@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express from "express";
 import isAuthenticated from "../middleware/isAuthenticated.js";
 import {
   getCourseProgress,
@@ -6,13 +6,17 @@ import {
   markAsInCompleted,
   updateLectureProgress,
 } from "../controllers/courseProgress_controller.js";
-const router = new Router();
+
+const router = express.Router();
 
 router.route("/:courseId").get(isAuthenticated, getCourseProgress);
+
 router
   .route("/:courseId/lecture/:lectureId/view")
   .post(isAuthenticated, updateLectureProgress);
-router.route("/:courseId/complete").post(isAuthenticated, markAsCompleted);
-router.route("/:courseId/incomplete").post(isAuthenticated, markAsInCompleted);
+
+router.route("/:courseId/complete").patch(isAuthenticated, markAsCompleted); 
+
+router.route("/:courseId/incomplete").patch(isAuthenticated, markAsInCompleted); 
 
 export default router;
