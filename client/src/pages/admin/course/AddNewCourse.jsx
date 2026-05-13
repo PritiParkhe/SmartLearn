@@ -16,6 +16,7 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { COURSE_CATEGORIES } from "@/constants/categories";
 
 const AddNewCourse = () => {
   const [courseTitle, setCourseTitle] = useState("");
@@ -28,26 +29,33 @@ const AddNewCourse = () => {
     setCategory(value);
   };
   const createCourseHandler = async () => {
+    if (!courseTitle.trim()) {
+      return toast.error("Course title is required.");
+    }
+    if (!category) {
+      return toast.error("Please select a category.");
+    }
     await createCourse({ courseTitle, category });
   };
-// for displaying toast message
-useEffect(()=>{
-  if(isSuccess){
-    toast.success(data?.message || "Course created.")
-    navigate("/admin/course")
-  }
-},[isSuccess, error])
+  // for displaying toast message
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success(data?.message || "Course created.");
+      navigate("/admin/course");
+    }
+    if (error) {
+      toast.error(error?.data?.message || "Failed to create course.");
+    }
+  }, [isSuccess, error]);
   return (
     <div className=" flex-1 mx-10">
       <div className="mb-4">
         <h1 className="font-bold text-xl">
           Let's add course add some basic course details for your new course
         </h1>
-        <p className="text-sm">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque
-          temporibus doloremque enim maiores. Sit cupiditate maiores itaque
-          nulla laboriosam optio? Placeat, officiis numquam? Dolores ad officiis
-          modi facere incidunt similique?
+        <p className="text-sm text-gray-500">
+          Add a title and category to get started. You can add more details
+          after creation.
         </p>
       </div>
       <div className="space-y-4">
@@ -70,22 +78,11 @@ useEffect(()=>{
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Category</SelectLabel>
-                <SelectItem value="Next Js">Next Js</SelectItem>
-                <SelectItem value="Data Science">Data Science</SelectItem>
-                <SelectItem value="Frontend Development">
-                  Frontend Development
-                </SelectItem>
-                <SelectItem value="Backend Development">
-                  Backend Development
-                </SelectItem>
-                <SelectItem value="MERN Stack Development">
-                  MERN Stack Development
-                </SelectItem>
-                <SelectItem value="Javascript">Javascript</SelectItem>
-                <SelectItem value="Python">Python</SelectItem>
-                <SelectItem value="Docker">Docker</SelectItem>
-                <SelectItem value="MongoDB">MongoDB</SelectItem>
-                <SelectItem value="HTML">HTML</SelectItem>
+                {COURSE_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.label}
+                  </SelectItem>
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>

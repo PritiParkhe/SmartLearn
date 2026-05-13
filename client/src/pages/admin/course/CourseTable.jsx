@@ -20,6 +20,7 @@ const CourseTable = () => {
   const navigate = useNavigate();
 
   if (isLoading) return <h1>Loading...</h1>;
+  if (!data?.courses) return <h1>Failed to load courses.</h1>;
 
   return (
     <div>
@@ -45,14 +46,24 @@ const CourseTable = () => {
               </TableCell>
               <TableCell>{course.courseTitle}</TableCell>
               <TableCell className="text-right">
-                <Button size="sm" variant="ghost" onClick={()=> navigate(`${course._id}`)}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => navigate(`${course._id}`)}
+                >
                   <Edit />
                 </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
-        <TableFooter></TableFooter>
+        <TableFooter>
+          <TableRow>
+            <TableCell colSpan={4} className="text-right text-sm text-gray-500">
+              Total: {data.courses.length} courses
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );

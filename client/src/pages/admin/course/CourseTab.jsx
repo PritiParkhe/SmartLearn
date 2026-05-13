@@ -6,10 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
 import RichTextEditor from "@/components/ui/RichTextEditor";
-import { Label } from "@radix-ui/react-dropdown-menu";
+import { Label } from "@/components/ui/label";
 import React, { useEffect, useState } from "react";
 import {
   Select,
@@ -26,8 +25,10 @@ import {
   useEditCourseMutation,
   useGetCourseByIdQuery,
   usePublishedCourseMutation,
+  useDeleteCourseMutation,
 } from "@/features/api/courseApi";
 import { toast } from "sonner";
+import { COURSE_CATEGORIES } from "@/constants/categories";
 
 const CourseTab = () => {
   const [input, setInput] = useState({
@@ -59,7 +60,7 @@ const CourseTab = () => {
         description: course.description,
         category: course.category,
         courseLevel: course.courseLevel,
-        coursePrice: course.categoryPrice,
+        coursePrice: course.coursePrice,
         courseThumbnail: course.courseThumbnail,
       });
     }
@@ -109,7 +110,7 @@ const CourseTab = () => {
     await editCourse({ formData, courseId });
   };
 
-  const PublishStatusHandeller = async (action) => {
+  const publishStatusHandler = async (action) => {
     try {
       const response = await publishCourse({ courseId, query: action });
       if (response.data) {
@@ -125,7 +126,7 @@ const CourseTab = () => {
       toast.success(data.message || "Course updated.");
     }
     if (error) {
-      toast.error(error.data.message || "Failed to update course");
+      toast.error(error?.data?.message || "Failed to update course");
     }
   }, [isSuccess, error]);
 
@@ -145,14 +146,25 @@ const CourseTab = () => {
             variant="outline"
             disabled={courseByIdData?.course.lectures.length === 0}
             onClick={() =>
-              PublishStatusHandeller(
-                courseByIdData?.course.isPublished ? "false" : "true"
+              publishStatusHandler(
+                courseByIdData?.course.isPublished ? "false" : "true",
               )
             }
           >
             {courseByIdData?.course.isPublished ? "UnPublished" : "Published"}
           </Button>
-          <Button>Remove Course</Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              if (
+                window.confirm("Are you sure you want to delete this course?")
+              ) {
+                useDeleteCourseMutation(courseId);
+              }
+            }}
+          >
+            Remove Course
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -191,22 +203,11 @@ const CourseTab = () => {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Category</SelectLabel>
-                    <SelectItem value="Next Js">Next Js</SelectItem>
-                    <SelectItem value="Data Science">Data Science</SelectItem>
-                    <SelectItem value="Frontend Development">
-                      Frontend Development
-                    </SelectItem>
-                    <SelectItem value="Backend Development">
-                      Backend Development
-                    </SelectItem>
-                    <SelectItem value="MERN Stack Development">
-                      MERN Stack Development
-                    </SelectItem>
-                    <SelectItem value="Javascript">Javascript</SelectItem>
-                    <SelectItem value="Python">Python</SelectItem>
-                    <SelectItem value="Docker">Docker</SelectItem>
-                    <SelectItem value="MongoDB">MongoDB</SelectItem>
-                    <SelectItem value="HTML">HTML</SelectItem>
+                    {COURSE_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
