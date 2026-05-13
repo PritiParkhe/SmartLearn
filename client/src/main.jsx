@@ -5,16 +5,29 @@ import App from "./App.jsx";
 import { Provider } from "react-redux";
 import { appStore } from "./app/store";
 import { Toaster } from "./components/ui/sonner";
-import { useLoadUserQuery } from "./features/api/authapi";
+import { useLoadUserQuery } from "./features/api/authapi"; 
 
-const Custom = ({ children }) => {
+// Shows loading screen while auth state is being resolved on page load
+const AppInitializer = ({ children }) => {
   const { isLoading } = useLoadUserQuery();
-  return <>{isLoading ? <h1>Loading....</h1> : <>{children}</>}</>;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <span className="text-gray-500 text-lg">Loading...</span>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 };
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={appStore}>
-      <App />
+      <AppInitializer>
+        <App />
+      </AppInitializer>
       <Toaster />
     </Provider>
   </StrictMode>,

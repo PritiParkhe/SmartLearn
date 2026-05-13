@@ -72,7 +72,7 @@ export const authApi = createApi({
         method: "PUT",
         body: formData,
       }),
-      invalidatesTags: ["UserProfile"],  
+      invalidatesTags: ["UserProfile"],
     }),
   }),
 });

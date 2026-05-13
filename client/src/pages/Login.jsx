@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useLoginUserMutation,
   useRegisterUserMutation,
-} from "@/features/api/authapi";
+} from "@/features/api/authApi";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";

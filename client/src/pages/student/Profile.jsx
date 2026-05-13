@@ -17,7 +17,7 @@ import Course from "./Course";
 import {
   useLoadUserQuery,
   useUpdateUserMutation,
-} from "@/features/api/authapi";
+} from "@/features/api/authApi";
 import { toast } from "sonner";
 
 const Profile = () => {
