@@ -6,15 +6,15 @@ import { useNavigate } from "react-router-dom";
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-    const searchHandler = (e) => {
-      e.preventDefault();
-      if(searchQuery.trim() !== ""){
-        navigate(`/course/search?query=${searchQuery}`)
-      }
-      setSearchQuery("");
+  const searchHandler = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim() !== "") {
+      navigate(`/course/search?query=${searchQuery}`);
     }
+    setSearchQuery("");
+  };
   return (
-    <div className="relative bg-gradient-to-r from-blue-500 bg-indigo-600 dark:to-slate-900 py-16 px-4 text-center">
+    <div className="relative bg-gradient-to-r from-blue-500 to-indigo-600 dark:to-slate-900 py-16 px-4 text-center">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-white text-4xl font-bold mb-4">
           Find the Best Courses for You
@@ -23,7 +23,7 @@ const HeroSection = () => {
           Discover, Learn and upskill with our wide range of courses
         </p>
         <form
-        onSubmit={searchHandler}
+          onSubmit={searchHandler}
           action=""
           className="flex items-center bg-white dark:bg-gray-800 rounded-full shadow-lg overflow-hidden max-w-xl mx-auto mb-6"
         >
@@ -38,7 +38,12 @@ const HeroSection = () => {
             Search
           </Button>
         </form>
-        <Button onClick={()=>navigate(`/course/search?query`)} className="bg-white dark:bg-gray-800 text-blue-600 rounded-full hover:bg-gray-200">Explore</Button>
+        <Button
+          onClick={() => navigate("/course/search?query=")}
+          className="bg-white dark:bg-gray-800 text-blue-600 rounded-full hover:bg-gray-200"
+        >
+          Explore
+        </Button>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { useGetPublishedCoursesQuery } from "@/features/api/courseApi";
 const Courses = () => {
   const { data, isLoading, isError } = useGetPublishedCoursesQuery();
 
-  if (isError) return <h1>Some Error occuresd while fetching courses.</h1>;
+  if (isError) return <h1>Something went wrong while fetching courses.</h1>;
   return (
     <div className="bg-gray-50 dark:bg-[#141414]">
       <div className="max-w-7xl mx-auto p-6">
@@ -17,8 +17,8 @@ const Courses = () => {
                 <CourseSkeleton key={index} />
               ))
             : data?.courses &&
-              data.courses.map((course, index) => (
-                <Course key={index} course={course} />
+              data.courses.map((course) => (
+                <Course key={course._id} course={course} />
               ))}
         </div>
       </div>

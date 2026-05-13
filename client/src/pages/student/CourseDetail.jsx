@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import BuyCourseButton from "@/components/ui/BuyCourseButton";
 import {
@@ -24,14 +25,12 @@ const CourseDetail = () => {
   if (isLoading) return <p>Loading course details...</p>;
   if (isError || !data) return <p>Something went wrong. Please try again.</p>;
 
-  
-
   const { course, purchased } = data;
   const handleContinueCourse = () => {
-    if(purchased){
-      navigate(`/course-progress/${courseId}`)
+    if (purchased) {
+      navigate(`/course-progress/${courseId}`);
     }
-  }
+  };
 
   return (
     <div className="space-y-5">
@@ -49,7 +48,10 @@ const CourseDetail = () => {
           </p>
           <div className="flex items-center gap-2 text-sm">
             <BadgeInfo size={16} />
-            <p>Last updated </p>
+            <p>
+              Last updated{" "}
+              {new Date(course.updatedAt).toLocaleDateString("en-IN")}
+            </p>
           </div>
           <p>Students enrolled: {course?.enrolledStudents.length}</p>
         </div>
@@ -57,22 +59,30 @@ const CourseDetail = () => {
       <div className="max-w-7xl mx-auto my-5 px-4 md:px-8 flex flex-col lg:flex-row justify-between gap-10">
         <div className="w-full lg:w-1/2 space-y-5">
           <h1 className="font-bold text-xl md:text-2xl">Description</h1>
+
           <p
-            className="text-sm"
-            dangerouslySetInnerHTML={{ __html: course.description }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(course.description),
+            }}
           />
           <Card>
             <CardHeader>
               <CardTitle>Course Content</CardTitle>
-              <CardDescription>4 lectures</CardDescription>
+              <CardDescription>
+                {course.lectures.length} lectures
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {course.lectures.map((lecture, idx) => (
                 <div key={idx} className="flex items-center gap-3 text-sm">
                   <span>
-                    {true ? <PlayCircle size={14} /> : <Lock size={14} />}
+                    {lecture.isPreviewFree || purchased ? (
+                      <PlayCircle size={14} className="text-green-500" />
+                    ) : (
+                      <Lock size={14} className="text-gray-400" />
+                    )}
                   </span>
-                  <p>{lecture.lectureTitle}</p>
+                  <p>{course.subTitle}</p>
                 </div>
               ))}
             </CardContent>
@@ -85,17 +95,20 @@ const CourseDetail = () => {
                 <ReactPlayer
                   width="100%"
                   height={"100%"}
-                  url={course.lectures[0].videoUrl}
+                  url={course.lectures?.[0]?.videoUrl || ""}
                   controls={true}
                 />
               </div>
-              <h1>Lecture title</h1>
+              <h1>{course.lectures?.[0]?.lectureTitle || "Preview Lecture"}</h1>
+
               <Separator className="my-2" />
               <h1 className="text-lg md:text-xl font-semibold">Course Price</h1>
             </CardContent>
             <CardFooter className="flex justify-center p-4">
               {purchased ? (
-                <Button onClick={handleContinueCourse} className="w-full">Continue Course</Button>
+                <Button onClick={handleContinueCourse} className="w-full">
+                  Continue Course
+                </Button>
               ) : (
                 <BuyCourseButton courseId={courseId} />
               )}

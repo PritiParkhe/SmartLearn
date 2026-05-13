@@ -21,7 +21,11 @@ const CourseProgress = () => {
   const [updateLectureProgress] = useUpdateLectureProgressMutation();
   const [
     completeCourse,
-    { data: markCompleteData, isSuccess: completedSuccess },
+    {
+      data: markCompleteData,
+      isSuccess: completedSuccess,
+      isError: completeError,
+    },
   ] = useCompleteCourseMutation();
   const [
     inCompleteCourse,
@@ -31,11 +35,14 @@ const CourseProgress = () => {
   useEffect(() => {
     if (completedSuccess) {
       refetch();
-      toast.success(markCompleteData.message);
+
+      toast.success(markCompleteData?.message || "Course marked as completed.");
     }
     if (inCompletedSuccess) {
       refetch();
-      toast.success(markInCompleteData.message);
+      toast.success(
+        markInCompleteData?.message || "Course marked as incomplete.",
+      );
     }
   }, [completedSuccess, inCompletedSuccess]);
 
@@ -52,7 +59,9 @@ const CourseProgress = () => {
     currentLecture || (courseDetails.lectures && courseDetails.lectures[0]);
 
   const isLectureCompleted = (lectureId) => {
-    return progress.some((prog) => prog.lectureId === lectureId && prog.viewed);
+    return progress.some(
+      (prog) => prog.lectureId.toString() === lectureId && prog.viewed,
+    );
   };
 
   const handleLectureProgress = async (lectureId) => {
@@ -62,7 +71,6 @@ const CourseProgress = () => {
   // Handle select a specific lecture to watch
   const handleSelectLecture = (lecture) => {
     setCurrentLecture(lecture);
-    handleLectureProgress(lecture._id);
   };
 
   const handleCompleteCourse = async () => {
@@ -83,7 +91,8 @@ const CourseProgress = () => {
         >
           {completed ? (
             <div className="flex items-center">
-              <CheckCircle className="h-4 w-4 mr-2" /> <span>Completed</span>{" "}
+              <CheckCircle className="h-4 w-4 mr-2" />{" "}
+              <span>Completed</span>{" "}
             </div>
           ) : (
             "Mark as completed"
@@ -110,7 +119,7 @@ const CourseProgress = () => {
               {`Lecture ${
                 courseDetails.lectures.findIndex(
                   (lec) =>
-                    lec._id === (currentLecture?._id || initialLecture._id)
+                    lec._id === (currentLecture?._id || initialLecture._id),
                 ) + 1
               } : ${
                 currentLecture?.lectureTitle || initialLecture.lectureTitle
@@ -127,7 +136,7 @@ const CourseProgress = () => {
                 key={lecture._id}
                 className={`mb-3 hover:cursor-pointer transition transform ${
                   lecture._id === currentLecture?._id
-                    ? "bg-gray-200 dark:dark:bg-gray-800"
+                    ? "bg-gray-200 dark:bg-gray-800"
                     : ""
                 } `}
                 onClick={() => handleSelectLecture(lecture)}

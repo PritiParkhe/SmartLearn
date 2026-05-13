@@ -12,7 +12,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import React, { useState } from "react";
 
-const categories = [
+export const COURSE_CATEGORIES = [
   { id: "nextjs", label: "Next JS" },
   { id: "data science", label: "Data Science" },
   { id: "frontend development", label: "Frontend Development" },
