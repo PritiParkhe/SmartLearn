@@ -1,6 +1,6 @@
 import React from "react";
 import Course from "./Course";
-import { useLoadUserQuery } from "@/features/api/authApi";
+import { useLoadUserQuery } from "@/features/api/authapi";
 
 const MyLearning = () => {
   ` `;
