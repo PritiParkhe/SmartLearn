@@ -44,7 +44,6 @@ const Profile = () => {
       toast.error("No file selected.");
     }
   };
-  
 
   const updateUserHandeller = async () => {
     const formData = new FormData();
@@ -64,7 +63,7 @@ const Profile = () => {
   }, [error, updateUserData, isSuccess, isError]);
 
   if (isLoading) return <h1>Profile Loading...</h1>;
-  const user  = data && data.user;
+  const user = data && data.user;
   return (
     <div className="max-w-4xl mx-auto px-4 my-10 ">
       <h1 className="font-bold text-2xl text-center md:text-left">PROFIlE</h1>
@@ -138,7 +137,10 @@ const Profile = () => {
                 </div>
               </div>
               <DialogFooter>
-                <Button disable={updateUserIsLoading} onClick={updateUserHandeller}>
+                <Button
+                  disable={updateUserIsLoading}
+                  onClick={updateUserHandeller}
+                >
                   {updateUserIsLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
