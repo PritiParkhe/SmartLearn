@@ -1,4 +1,4 @@
-export const authorizeRole = (...roles) => {
+const authorizeRole = (...roles) => {
   return (req, res, next) => {
     if (!req.role) {
       return res.status(401).json({
@@ -18,3 +18,4 @@ export const authorizeRole = (...roles) => {
   };
 };
 
+export default authorizeRole;

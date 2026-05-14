@@ -1,6 +1,6 @@
 import express from "express";
 import isAuthenticated from "../middleware/isAuthenticated.js";
-import { authorizeRole } from "../middleware/authorizeRole.js";
+import authorizeRole from "../middleware/authorizeRole.js";
 import {
   createCourse,
   createLecture,
@@ -14,6 +14,7 @@ import {
   removeLecture,
   searchCourse,
   togglePublishedCourse,
+  deleteCourse,
 } from "../controllers/course_controller.js";
 import upload from "../utils/multer.js";
 
@@ -42,6 +43,9 @@ router.get(
   authorizeRole("instructor"),
   getCreatorCourses,
 );
+router
+  .route("/:courseId")
+  .delete(isAuthenticated, authorizeRole("instructor"), deleteCourse);
 
 // ─────────────────────────────────────────
 //  INSTRUCTOR — Dynamic

@@ -7,29 +7,30 @@ import {
   getMyPurchasedCourses,
   getPurchaseStatus,
   getCourseDetailWithPurchaseStatus,
-  stripeWebhook,
-} from "../controllers/coursePurchase_controller.js";
+} from "../controllers/coursePurschase_controller.js";
 
 const router = express.Router();
 
 // ── Webhook ──────────────────────────────────────────────
-router.route("/webhook").post(stripeWebhook);
 
 // ── Student routes ────────────────────────────────────────
-router.route("/checkout/create-checkout-session")
+router
+  .route("/checkout/create-checkout-session")
   .post(isAuthenticated, createCheckoutSession);
 
-router.route("/my-courses")
-  .get(isAuthenticated, getMyPurchasedCourses);
+router.route("/my-courses").get(isAuthenticated, getMyPurchasedCourses);
 
-router.route("/course/:courseId/status")
+router
+  .route("/course/:courseId/status")
   .get(isAuthenticated, getPurchaseStatus);
 
-router.route("/course/:courseId/detail-with-status")
+router
+  .route("/course/:courseId/detail-with-status")
   .get(isAuthenticated, getCourseDetailWithPurchaseStatus);
 
-// ── Admin routes ──────────────────────────────────────────
-router.route("/")
-  .get(isAuthenticated, authorizeRole("admin"), getAllPurchasedCourse);
+// ── Instructor routes ────────────────────────────────────────
+router
+  .route("/")
+  .get(isAuthenticated, authorizeRole("instructor"), getAllPurchasedCourse);
 
 export default router;
