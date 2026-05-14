@@ -11,20 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import React, { useState } from "react";
-
-export const COURSE_CATEGORIES = [
-  { id: "nextjs", label: "Next JS" },
-  { id: "data science", label: "Data Science" },
-  { id: "frontend development", label: "Frontend Development" },
-  { id: "fullstack development", label: "Fullstack Development" },
-  { id: "mern stack development", label: "MERN Stack Development" },
-  { id: "backend development", label: "Backend Development" },
-  { id: "javascript", label: "Javascript" },
-  { id: "python", label: "Python" },
-  { id: "docker", label: "Docker" },
-  { id: "mongodb", label: "MongoDB" },
-  { id: "html", label: "HTML" },
-];
+import { COURSE_CATEGORIES } from "@/constants/categories";
 
 const Filter = ({ handleFilterChange }) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -65,7 +52,7 @@ const Filter = ({ handleFilterChange }) => {
       <Separator className="my-4" />
       <div>
         <h1 className="font-semibold mb-2">CATEGORY</h1>
-        {categories.map((category) => (
+        {COURSE_CATEGORIES.map((category) => (
           <div key={category.id} className="flex items-center space-x-2 my-2">
             <Checkbox
               id={category.id}

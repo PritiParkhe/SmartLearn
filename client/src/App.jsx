@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import HeroSection from "./pages/student/HeroSection";
 import MainLayout from "./layout/MainLayout";
 import Courses from "./pages/student/Courses";
@@ -44,14 +43,6 @@ const appRouter = createBrowserRouter([
         element: (
           <AuthenticatedUser>
             <Login />
-          </AuthenticatedUser>
-        ),
-      },
-      {
-        path: "register",
-        element: (
-          <AuthenticatedUser>
-            <Register />
           </AuthenticatedUser>
         ),
       },

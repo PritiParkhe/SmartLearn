@@ -25,7 +25,6 @@ import {
   useEditCourseMutation,
   useGetCourseByIdQuery,
   usePublishedCourseMutation,
-  useDeleteCourseMutation,
 } from "@/features/api/courseApi";
 import { toast } from "sonner";
 import { COURSE_CATEGORIES } from "@/constants/categories";
@@ -159,7 +158,7 @@ const CourseTab = () => {
               if (
                 window.confirm("Are you sure you want to delete this course?")
               ) {
-                useDeleteCourseMutation(courseId);
+                // call delete course api
               }
             }}
           >
