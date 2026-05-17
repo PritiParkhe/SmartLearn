@@ -47,7 +47,7 @@ const CourseDetail = () => {
             <p>
               Last updated{" "}
               {course?.updatedAt
-                ? new Date(course.updatedAt).toLocaleDateString("en-IN") // ✅ fixed
+                ? new Date(course.updatedAt).toLocaleDateString("en-IN") 
                 : "N/A"}
             </p>
           </div>
@@ -80,7 +80,7 @@ const CourseDetail = () => {
                       <Lock size={14} className="text-gray-400" />
                     )}
                   </span>
-                  <p>{lecture?.lectureTitle || "Untitled Lecture"}</p> {/* ✅ fixed */}
+                  <p>{lecture?.lectureTitle || "Untitled Lecture"}</p> 
                 </div>
               ))}
             </CardContent>
@@ -109,7 +109,7 @@ const CourseDetail = () => {
               </h1>
               <Separator className="my-2" />
               <h1 className="text-lg md:text-xl font-semibold">
-                ₹{course?.coursePrice || "Free"} {/* ✅ actual price */}
+                ₹{course?.coursePrice || "Free"} 
               </h1>
             </CardContent>
             <CardFooter className="flex justify-center p-4">

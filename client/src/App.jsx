@@ -87,7 +87,7 @@ const appRouter = createBrowserRouter([
 
       // instructor routes
       {
-        path: "admin",
+        path: "instructor",
         element: (
           <InstructorRoute>
             <Sidebar />

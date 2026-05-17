@@ -34,12 +34,9 @@ const CourseProgress = () => {
 
   useEffect(() => {
     if (completedSuccess) {
-      refetch();
-
       toast.success(markCompleteData?.message || "Course marked as completed.");
     }
     if (inCompletedSuccess) {
-      refetch();
       toast.success(
         markInCompleteData?.message || "Course marked as incomplete.",
       );
@@ -77,6 +74,7 @@ const CourseProgress = () => {
     await completeCourse(courseId);
   };
   const handleInCompleteCourse = async () => {
+    console.log("handleCompleteCourse called, courseId:", courseId);
     await inCompleteCourse(courseId);
   };
 
@@ -107,6 +105,8 @@ const CourseProgress = () => {
             <video
               src={currentLecture?.videoUrl || initialLecture.videoUrl}
               controls
+              controlsList="nodownload"
+              onContextMenu={(e) => e.preventDefault()}
               className="w-full h-auto md:rounded-lg"
               onPlay={() =>
                 handleLectureProgress(currentLecture?._id || initialLecture._id)

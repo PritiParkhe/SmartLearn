@@ -25,7 +25,7 @@ export const courseProgressApi = createApi({
 
     completeCourse: builder.mutation({
       query: (courseId) => ({
-        url: `/${courseId}/complete`,
+        url: `${courseId}/complete`,
         method: "PATCH",
       }),
       invalidatesTags: ["CourseProgress"],
@@ -33,7 +33,7 @@ export const courseProgressApi = createApi({
 
     inCompleteCourse: builder.mutation({
       query: (courseId) => ({
-        url: `/${courseId}/incomplete`,
+        url: `${courseId}/incomplete`,
         method: "PATCH",
       }),
       invalidatesTags: ["CourseProgress"],

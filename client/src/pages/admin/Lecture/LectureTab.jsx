@@ -35,19 +35,21 @@ const LectureTab = () => {
 
   const { data: lectureData } = useGetLecturebyIdQuery(lectureId);
   const lecture = lectureData?.lecture;
-  useEffect (() => {
-      if (lecture) {
-        setLectureTitle(lecture.lectureTitle);
-        setIsFree(lecture.isPreviewFree);
-        setUploadVideoInfo(lecture.videoInfo);
-      }
-    },
-    [lecture]);
+  useEffect(() => {
+    if (lecture) {
+      setLectureTitle(lecture.lectureTitle);
+      setIsFree(lecture.isPreviewFree);
+      setUploadVideoInfo(lecture.videoInfo);
+    }
+  }, [lecture]);
 
   const [editLecture, { data, isLoading, error, isSuccess }] =
     useEditLectureMutation();
-  
-  const [removeLecture, {data :removeData, isLoading:removeIsLoading,isSuccess:removeSuccess}] = useRemoveLectureMutation();
+
+  const [
+    removeLecture,
+    { data: removeData, isLoading: removeIsLoading, isSuccess: removeSuccess },
+  ] = useRemoveLectureMutation();
 
   const fileChangeHandler = async (e) => {
     const file = e.target.files[0];
@@ -57,6 +59,7 @@ const LectureTab = () => {
       setMediaProgress(true);
       try {
         const res = await axios.post(`${MEDIA_API}/upload-video`, formData, {
+          withCredentials: true,
           onUploadProgress: ({ loaded, total }) => {
             setUploadProgress(Math.round((loaded * 100) / total));
           },
@@ -88,9 +91,9 @@ const LectureTab = () => {
     });
   };
 
-  const removeLectureHandeller =async()=>{
+  const removeLectureHandeller = async () => {
     await removeLecture(lectureId);
-  }
+  };
   useEffect(() => {
     if (isSuccess) {
       toast.success(data.message);
@@ -99,12 +102,11 @@ const LectureTab = () => {
       toast.error(error.data.message);
     }
   }, [isSuccess, error]);
-   useEffect(()=>{
+  useEffect(() => {
     if (removeSuccess) {
-      toast.success(removeData.message)
-      
+      toast.success(removeData.message);
     }
-   })
+  });
   return (
     <div>
       <Card>
@@ -116,12 +118,18 @@ const LectureTab = () => {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Button disabled={removeIsLoading} onClick={removeLectureHandeller} variant="destructive">
-              {
-                removeIsLoading ? <>
-                <Loader2 className=""mr-2 h-4 w-4 animate-spin />
-                </> : "Remove Lecture"
-              }
+            <Button
+              disabled={removeIsLoading}
+              onClick={removeLectureHandeller}
+              variant="destructive"
+            >
+              {removeIsLoading ? (
+                <>
+                  <Loader2 className="" mr-2 h-4 w-4 animate-spin />
+                </>
+              ) : (
+                "Remove Lecture"
+              )}
             </Button>
           </div>
         </CardHeader>
@@ -146,10 +154,7 @@ const LectureTab = () => {
             />
           </div>
           <div className="flex items-center">
-            <Switch
-              checked={isFree}
-              onCheckedChange={setIsFree}
-            />
+            <Switch checked={isFree} onCheckedChange={setIsFree} />
             <Label htmlFor="airplane-mode">Is this video is free</Label>
           </div>
           {mediaProgress && (
@@ -160,11 +165,13 @@ const LectureTab = () => {
           )}
           <div className="mt-4">
             <Button disabled={buttonDisable} onClick={editLectureHandeller}>
-              {
-                isLoading ? <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                </> : "Update Lecture"
-              }
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                </>
+              ) : (
+                "Update Lecture"
+              )}
             </Button>
           </div>
         </CardContent>

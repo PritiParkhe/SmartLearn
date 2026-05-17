@@ -25,6 +25,7 @@ import {
   useEditCourseMutation,
   useGetCourseByIdQuery,
   usePublishedCourseMutation,
+  useDeleteCourseMutation,
 } from "@/features/api/courseApi";
 import { toast } from "sonner";
 import { COURSE_CATEGORIES } from "@/constants/categories";
@@ -67,6 +68,7 @@ const CourseTab = () => {
 
   const [previewThumbnail, setPreviewThumbnail] = useState("");
   const navigate = useNavigate();
+  const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation();
 
   // for edit course
   const [editCourse, { data, isLoading, isSuccess, error }] =
@@ -154,15 +156,33 @@ const CourseTab = () => {
           </Button>
           <Button
             variant="destructive"
-            onClick={() => {
+            disabled={isDeleting}
+            onClick={async () => {
               if (
-                window.confirm("Are you sure you want to delete this course?")
+                window.confirm(
+                  "Are you sure? This permanently deletes the course and all lectures.",
+                )
               ) {
-                // call delete course api
+                const response = await deleteCourse(courseId);
+                if (response.data) {
+                  toast.success("Course deleted successfully");
+                  navigate("/instructor/course");
+                } else {
+                  toast.error(
+                    response.error?.data?.message || "Failed to delete course",
+                  );
+                }
               }
             }}
           >
-            Remove Course
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Remove Course"
+            )}
           </Button>
         </div>
       </CardHeader>
@@ -256,7 +276,10 @@ const CourseTab = () => {
             )}
           </div>
           <div className=" flex gap-2">
-            <Button variant="outline" onClick={() => navigate("/admin/course")}>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/instructor/course")}
+            >
               Cancel
             </Button>
             <Button disabled={isLoading} onClick={updateCourseHandeller}>

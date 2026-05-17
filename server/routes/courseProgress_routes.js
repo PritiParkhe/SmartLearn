@@ -9,14 +9,12 @@ import {
 
 const router = express.Router();
 
-router.route("/:courseId").get(isAuthenticated, getCourseProgress);
-
+router.route("/:courseId/complete").patch(isAuthenticated, markAsCompleted);
+router.route("/:courseId/incomplete").patch(isAuthenticated, markAsInCompleted);
 router
   .route("/:courseId/lecture/:lectureId/view")
   .post(isAuthenticated, updateLectureProgress);
 
-router.route("/:courseId/complete").patch(isAuthenticated, markAsCompleted); 
-
-router.route("/:courseId/incomplete").patch(isAuthenticated, markAsInCompleted); 
+router.route("/:courseId").get(isAuthenticated, getCourseProgress);
 
 export default router;
