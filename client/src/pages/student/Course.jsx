@@ -12,6 +12,7 @@ const Course = ({ course }) => {
           <img
             src={course.courseThumbnail || "/placeholder-course.jpg"}
             alt={course.courseTitle}
+            className="w-full h-36 object-cover"
           />
         </div>
         <CardContent className="px-5 py-4 space-y-3">

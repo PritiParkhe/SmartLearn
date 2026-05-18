@@ -31,14 +31,13 @@ export const register = async (req, res) => {
       success: true,
       message: "Account created successfully.",
     });
-
   } catch (error) {
     //  Mongoose validation error — bad email format, short password, etc.
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map((e) => e.message);
       return res.status(400).json({
         success: false,
-        message: messages[0], 
+        message: messages[0],
       });
     }
 
@@ -70,7 +69,12 @@ export const login = async (req, res) => {
         message: "All fields are required.",
       });
     }
-
+    if (email !== email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: "Incorrect email or password.",
+      });
+    }
     // select("+password") needed because schema has select: false on password
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
@@ -131,7 +135,15 @@ export const getUserProfile = async (req, res) => {
 
     const user = await User.findById(userId)
       .select("-password")
-      .populate("enrolledCourses", "title thumbnail price category");
+      .populate({
+        path: "enrolledCourses",
+        select:
+          "courseTitle courseThumbnail coursePrice courseLevel category creator",
+        populate: {
+          path: "creator",
+          select: "name photoUrl",
+        },
+      });
 
     if (!user) {
       return res.status(404).json({
