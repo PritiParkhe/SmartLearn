@@ -1,152 +1,153 @@
-```markdown
-# SmartLearn
+# Priti Parkhe — Full-Stack Engineer
 
-SmartLearn is a simple yet effective Learning Management System designed to streamline the learning experience for both students and instructors. It offers features like course creation, enrollment, lecture material upload/viewing, quizzes, progress tracking, and more — all in a clean and user-friendly interface.
-To add a **demo link** to your SmartLearn LMS README, include it prominently near the top so users can quickly access it. Here’s how you can format it:
+I build production-ready web apps end-to-end — JWT-secured REST APIs to responsive React UIs.
+Specializing in the **MERN stack** with real payment and cloud media integrations.
 
 ---
 
 ## 🔗 Live Demo
 
-**🌐 [SmartLearn LMS – Live Demo](https://smart-learn-orpin.vercel.app)**
+**[SmartLearn LMS → smart-learn-orpin.vercel.app](https://smart-learn-orpin.vercel.app)**
 
-> Explore the platform as a student or instructor.
-> *(Demo login: [student@example.com](mailto:student@example.com) / [instructor@example.com](mailto:instructor@example.com) – password: `demo123`)*
+| Role | Email | Password |
+|---|---|---|
+| Student | student@gmail.com | 123456 |
+| Instructor | instructor@gmail.com | 123456 |
 
+---
 
-## Features
+## 🛠 Tech Stack
 
-- 👨‍🏫 Instructor & Student Roles – Role-based access to manage or enroll in courses.
-- 📚 Course Creation & Enrollment – Instructors can create courses; students can enroll easily.
-- 📄 Lecture Materials Upload/View – Upload or access PDFs, videos, and more.
-- ✅ Quizzes & Assignments – Students can submit work; instructors can grade.
-- 📈 Track Student Progress – Visualize completion and performance metrics.
-- 🔒 Secure Authentication – JWT-based user login, register, and session handling.
-- 📑 Course & Lecture Management – Instructors can edit/delete course content.
-- 🔍 Search & Filter Courses – Find relevant courses quickly using keywords/categories.
-- 🏅 Progress Tracking – Students mark completed lectures; instructors see progress.
-- 🌗 Light/Dark Mode – Personalized theme toggle saved across sessions.
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-593D88?style=flat&logo=redux&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=flat&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=flat&logo=mongodb&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-626CD9?style=flat&logo=Stripe&logoColor=white)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat&logo=cloudinary&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=JSON%20web%20tokens&logoColor=white)
 
-## Tech Stack
+---
 
-- **Frontend**: 
-  - **React.js** with **Hooks** for dynamic UI.
-  - **Redux Toolkit (RTK Query)** for state management and API integration.
-  - **Tailwind CSS** for styling and responsive design.
-  
-- **Backend**: 
-  - **Node.js** and **Express.js** for building APIs.
-  - **MongoDB** for storing user data, courses, and quiz results.
-  - **JWT** for authentication and authorization.
-  - **Cloudinary** for media storage (course videos, images).
-  - **Stripe API** for payment processing.
+## 📦 SmartLearn LMS
 
-## Installation
+A full-stack Learning Management System built for two user types — students and instructors —
+with course management, media hosting, and payment processing.
 
-### Clone the repository
+**What it does:**
+- Instructors create and manage courses, upload video/PDF lecture materials, edit or delete content
+- Students browse, search, filter, and enroll in courses — including paid courses via Stripe
+- Role-based access control across all routes, secured with JWT
+
+**Tech:** React + RTK Query · Node.js/Express · MongoDB · Cloudinary · Stripe · JWT · Tailwind CSS
+
+**Built features:**
+- 🔐 JWT authentication — register, login, role-based route protection
+- 📚 Course creation, editing, deletion (instructor)
+- 🎬 Video + PDF upload via Cloudinary signed URLs
+- 💳 Stripe Checkout — server-side session, webhook-verified enrollment
+- 🔍 Course search and category filter
+- 🌗 Light/Dark mode — persisted across sessions
+- 📊 Admin analytics dashboard — system-wide course and user metrics
+
+**Architecture highlights:**
+- **RTK Query** handles all API state — no manual loading/error boilerplate
+- **Cloudinary pipeline** — async media upload with format validation
+- **Stripe webhook** — enrollment only confirmed after payment verified server-side
+- **MongoDB** — separate collections for users, courses, lectures, and enrollments
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/PritiParkhe/SmartLearn
+cd SmartLearn
 ```
 
-### Install dependencies
-
-#### Backend
+### 2. Install dependencies
 
 ```bash
-cd backend
+# Backend
+cd server
+npm install
+
+# Frontend
+cd ../client
 npm install
 ```
 
-#### Frontend
+### 3. Set up environment variables
 
-```bash
-cd client
-npm install
-```
+Create a `.env` file inside the `server` directory:
 
-### Set up environment variables
-
-Create a `.env` file in the **backend** directory and add the following:
-
-```bash
+```env
 MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-CLOUDINARY_URL=your_cloudinary_url
-STRIPE_SECRET_KEY=your_stripe_secret_key
 PORT=5000
+SECRET_KEY=your_secret_key
+FRONTEND_URL=http://localhost:5173
+
+# cloudinary 
+API_KEY=your_cloudinary_api_key
+API_SECRET=your_cloudinary_api_secret
+CLOUDINARY_NAME=your_cloudinary_name
+
+#stipe
+STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_SECRET_KEY=your_stripe_secret
+WEBHOOK_ENDPOINT_SECRET=your_webhook_endpoint_ secret
 ```
 
-### Running the application
-
-#### Backend
-
-In the **backend** folder:
+### 4. Run the app
 
 ```bash
-npm start
+# In /server
+npm start        # → http://localhost:5000
+
+# In /client
+npm start        # → http://localhost:3000
 ```
 
-This will start the backend server on **http://localhost:5000**.
+---
 
-#### Frontend
+## 🖼 Screenshots
 
-In the **frontend** folder:
+| Home (Light) | Home (Dark) |
+|---|---|
+| ![Home](./client/src/assets/homepage.png) | ![Dark](./client/src/assets/homepagedarktheme.png) |
 
-```bash
-npm start
-```
-
-This will start the frontend on **http://localhost:3000**.
-
-## Usage
-
-1. **Sign Up / Log In**: Create a new user account or log in with existing credentials.
-2. **Browse Courses**: Explore available courses based on your interests.
-3. **Enroll in Courses**: Select and enroll in courses of your choice.
-4. **Take Quizzes**: Complete quizzes at the end of each course to reinforce your learning.
-5. **Track Progress**: Keep track of your learning progress through your personal dashboard.
-6. **Admin Features**: Admins can add or manage courses, including uploading videos and documents.
-7. **Make Payments**: Pay for premium courses using Stripe's secure payment gateway.
-
-## Screenshots
-
-### Home Page
-
-![Home Page](./client/src/assets/homepage.png)
-![Home Page](./client/src/assets/homepagedarktheme.png)
-
-### Course Catalog
-
-![Course Catalog](./client/src/assets/courses.png)
-
-### Dashboard
+| Course Catalog | Course Detail |
+|---|---|
+| ![Courses](./client/src/assets/courses.png) | ![Detail](./client/src/assets/coursedetail.png) |
 
 ![Dashboard](./client/src/assets/dashboard.png)
 
-### Course Details
+---
 
-![Course Details](./client/src/assets/coursedetail.png)
+## 🚧 Roadmap
 
-## Roadmap
-Roadmap
-✅ Real-time notifications
-⏳ Chat & discussion forums
-⏳ Admin dashboard for system analytics
-⏳ Mobile app integration (React Native)
-⏳ Multi-Language Support**: Add support for multiple languages to cater to a global audience.
+- [ ] Quiz and assignment module
+- [ ] Student progress tracking dashboard
+- [ ] Real-time notifications
+- [ ] Discussion forums per course
 
-## Contributing
+---
 
-Contributions are welcome! If you find a bug or want to add a feature, feel free to open an issue or submit a pull request. 
+## 📈 Currently Learning / Open To
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature`).
-3. Commit your changes (`git commit -am 'Add new feature'`).
-4. Push to the branch (`git push origin feature/your-feature`).
-5. Create a new pull request.
+| Sharpening | Exploring | Available for |
+|---|---|---|
+| TypeScript, Docker, GitHub Actions CI/CD | Next.js App Router, server components, edge runtimes | Full-stack / backend SDE-1 or SDE-2 roles |
 
-## License
+---
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
+## 📬 Let's Connect
+
+Hiring or building something interesting? I respond within 24 hours.
+
+- 📧 **Email:** [parkhepriti47@gmail.com](mailto:parkhepriti47@gmail.com) ← *preferred*
+- 💼 **LinkedIn:** [linkedin.com/in/priti-parkhe](https://www.linkedin.com/in/priti-parkhe)
+- 🐙 **GitHub:** [github.com/PritiParkhe](https://github.com/PritiParkhe)
